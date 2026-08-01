@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { Pokemon, PokemonTypeName } from '@/types/pokemon'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useFavoriteToggle } from '@/composables/useFavoriteToggle'
 import { filterPokemonList } from '@/utils/search'
 import AppSearchBar from '@/components/layout/AppSearchBar.vue'
 import FilterSheet from '@/components/layout/FilterSheet.vue'
@@ -10,9 +11,12 @@ import PokemonCard from '@/components/pokemon/PokemonCard.vue'
 import PokemonDetail from '@/components/pokemon/PokemonDetail.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import SwipeToDelete from '@/components/ui/SwipeToDelete.vue'
 
 const favoritesStore = useFavoritesStore()
 const { favorites, isEmpty } = storeToRefs(favoritesStore)
+// Reutiliza el toggle con confirmación: el basurero pide confirmar al quitar.
+const { toggleFavorite } = useFavoriteToggle()
 
 const searchQuery = ref('')
 const appliedTypes = ref<PokemonTypeName[]>([])
@@ -87,7 +91,9 @@ function clearFilters() {
 
       <ul v-else class="favorites__grid">
         <li v-for="pokemon in filtered" :key="pokemon.id">
-          <PokemonCard :name="pokemon.name" :preloaded="pokemon" @select="selected = $event" />
+          <SwipeToDelete @delete="toggleFavorite(pokemon)">
+            <PokemonCard :name="pokemon.name" :preloaded="pokemon" @select="selected = $event" />
+          </SwipeToDelete>
         </li>
       </ul>
     </template>

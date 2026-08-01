@@ -30,6 +30,78 @@ export function getTypeColor(type: PokemonTypeName): string {
   return `var(--type-${type})`
 }
 
+/**
+ * Íconos de tipo (SVG del diseño) cargados una vez con glob de Vite y
+ * expuestos por nombre de tipo, para reutilizarlos en badges y cards (DRY).
+ */
+const TYPE_ICON_URLS = import.meta.glob('../assets/images/types/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
+const TYPE_ICONS: Record<string, string> = Object.fromEntries(
+  Object.entries(TYPE_ICON_URLS).map(([path, url]) => [
+    path.split('/').pop()!.replace('.svg', ''),
+    url,
+  ]),
+)
+
+/** URL del ícono SVG de un tipo (glifo blanco del diseño). */
+export function getTypeIconUrl(type: PokemonTypeName): string {
+  return TYPE_ICONS[type] ?? ''
+}
+
+/**
+ * Valores hex de cada tipo (espejan los tokens `--type-*` de tokens.css).
+ * Se necesitan en JS para teñir el SVG del ícono (el glifo del diseño viene
+ * en blanco y se reemplaza por el color del tipo).
+ */
+const TYPE_HEX: Record<PokemonTypeName, string> = {
+  normal: '#9e9e9e',
+  fire: '#ff9800',
+  water: '#2196f3',
+  grass: '#8bc34a',
+  electric: '#fbc02d',
+  ice: '#3d8bff',
+  fighting: '#e53935',
+  poison: '#9c27b0',
+  ground: '#c1a15a',
+  flying: '#00bcd4',
+  psychic: '#673ab7',
+  bug: '#7cb342',
+  rock: '#8d6e63',
+  ghost: '#7e57c2',
+  dragon: '#5e35b1',
+  dark: '#545454',
+  steel: '#78909c',
+  fairy: '#ec407a',
+}
+
+/**
+ * SVG inline del ícono de tipo, teñido con el color del tipo. El glifo del
+ * diseño viene en blanco (#FAFAFA / white sobre el path); se reemplaza por el
+ * hex del tipo para mostrarlo coloreado sobre un círculo blanco (pastillas).
+ */
+const TYPE_ICON_SVG_RAW = import.meta.glob('../assets/images/types/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+}) as Record<string, string>
+
+const TYPE_ICONS_SVG: Record<string, string> = Object.fromEntries(
+  Object.entries(TYPE_ICON_SVG_RAW).map(([path, raw]) => {
+    const type = path.split('/').pop()!.replace('.svg', '') as PokemonTypeName
+    // Solo el relleno del glifo (#FAFAFA); no se toca el `fill="white"` del clipPath.
+    const colored = raw.replace(/#FAFAFA/gi, TYPE_HEX[type] ?? '#000')
+    return [type, colored]
+  }),
+)
+
+export function getTypeIconSvg(type: PokemonTypeName): string {
+  return TYPE_ICONS_SVG[type] ?? ''
+}
+
 /** Nombre legible en español, con fallback al nombre crudo por robustez. */
 export function getTypeLabel(type: string): string {
   return TYPE_LABELS_ES[type as PokemonTypeName] ?? type

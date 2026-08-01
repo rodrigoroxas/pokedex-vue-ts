@@ -1,17 +1,23 @@
 <script setup lang="ts">
 /**
- * Loader de pokebola dibujada en CSS puro y animada (gira y rebota) para
- * indicar carga, tal como pide la prueba. El tamaño es configurable.
+ * Loader de pokebola dibujada en CSS puro y animada para indicar carga, tal
+ * como pide la prueba. `spin` la hace girar (splash); por defecto se balancea
+ * (loader en línea). El tamaño es configurable.
  */
-withDefaults(defineProps<{ size?: number; label?: string }>(), {
+withDefaults(defineProps<{ size?: number; label?: string; spin?: boolean }>(), {
   size: 96,
   label: 'Cargando...',
+  spin: false,
 })
 </script>
 
 <template>
   <div class="loader" role="status" :aria-label="label">
-    <div class="pokeball" :style="{ width: `${size}px`, height: `${size}px` }">
+    <div
+      class="pokeball"
+      :class="{ 'pokeball--spin': spin }"
+      :style="{ width: `${size}px`, height: `${size}px` }"
+    >
       <div class="pokeball__top"></div>
       <div class="pokeball__bottom"></div>
       <div class="pokeball__band"></div>
@@ -32,15 +38,20 @@ withDefaults(defineProps<{ size?: number; label?: string }>(), {
 .pokeball {
   position: relative;
   border-radius: 50%;
-  border: 4px solid #212121;
+  border: 4px solid #333333;
   overflow: hidden;
   animation: shake 1.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+
+/* Giro continuo para la pantalla de carga (splash). */
+.pokeball--spin {
+  animation: spin 0.9s linear infinite;
 }
 
 .pokeball__top {
   position: absolute;
   inset: 0 0 50% 0;
-  background: #ee1c25;
+  background: #f22539;
 }
 
 .pokeball__bottom {
@@ -55,7 +66,7 @@ withDefaults(defineProps<{ size?: number; label?: string }>(), {
   left: 0;
   right: 0;
   height: 6px;
-  background: #212121;
+  background: #333333;
 }
 
 .pokeball__button {
@@ -66,8 +77,9 @@ withDefaults(defineProps<{ size?: number; label?: string }>(), {
   height: 26%;
   transform: translate(-50%, -50%);
   background: #fafafa;
-  border: 4px solid #212121;
+  border: 4px solid #333333;
   border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #c4c4c4;
   z-index: 1;
 }
 
@@ -90,6 +102,12 @@ withDefaults(defineProps<{ size?: number; label?: string }>(), {
   }
   100% {
     transform: rotate(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

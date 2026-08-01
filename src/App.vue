@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TopNav from '@/components/layout/TopNav.vue'
 import TabBar from '@/components/layout/TabBar.vue'
+import SplashScreen from '@/components/layout/SplashScreen.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import { useConfirmStore } from '@/stores/confirm'
 
 const route = useRoute()
+const confirm = useConfirmStore()
 
 /** Las barras de navegación se ocultan en rutas sin "chrome" (onboarding). */
 const showChrome = computed(() => route.meta.chrome !== false)
+
+/** Pantalla de carga inicial (splash) con la pokebola animada al entrar. */
+const booting = ref(true)
+onMounted(() => {
+  window.setTimeout(() => (booting.value = false), 1800)
+})
 </script>
 
 <template>
@@ -27,6 +37,23 @@ const showChrome = computed(() => route.meta.chrome !== false)
 
     <!-- Navegación móvil (bottom tab bar) -->
     <TabBar v-if="showChrome" class="layout__tabbar" />
+
+    <!-- Diálogo de confirmación global -->
+    <Transition name="fade">
+      <ConfirmDialog
+        v-if="confirm.isOpen"
+        :title="confirm.title"
+        :message="confirm.message"
+        :confirm-label="confirm.confirmLabel"
+        @confirm="confirm.respond(true)"
+        @cancel="confirm.respond(false)"
+      />
+    </Transition>
+
+    <!-- Pantalla de carga inicial (splash) -->
+    <Transition name="fade">
+      <SplashScreen v-if="booting" />
+    </Transition>
   </div>
 </template>
 

@@ -3,7 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import type { Pokemon } from '@/types/pokemon'
 import { usePokemonStore } from '@/stores/pokemon'
 import { useFavoritesStore } from '@/stores/favorites'
-import { getTypeColor } from '@/utils/pokemonType'
+import { useFavoriteToggle } from '@/composables/useFavoriteToggle'
+import { getTypeColor, getTypeIconUrl } from '@/utils/pokemonType'
 import { capitalize, formatPokedexNumber } from '@/utils/format'
 import TypeBadge from '@/components/ui/TypeBadge.vue'
 import FavoriteButton from '@/components/pokemon/FavoriteButton.vue'
@@ -18,6 +19,7 @@ const emit = defineEmits<{ select: [pokemon: Pokemon] }>()
 
 const store = usePokemonStore()
 const favorites = useFavoritesStore()
+const { toggleFavorite } = useFavoriteToggle()
 
 const pokemon = ref<Pokemon | null>(props.preloaded ?? store.getCached(props.name) ?? null)
 
@@ -31,9 +33,9 @@ onMounted(async () => {
   }
 })
 
-const primaryColor = computed(() =>
-  pokemon.value ? getTypeColor(pokemon.value.types[0] ?? 'normal') : 'var(--type-normal)',
-)
+const primaryType = computed(() => pokemon.value?.types[0] ?? 'normal')
+const primaryColor = computed(() => getTypeColor(primaryType.value))
+const typeIcon = computed(() => getTypeIconUrl(primaryType.value))
 </script>
 
 <template>
@@ -55,7 +57,7 @@ const primaryColor = computed(() =>
     </div>
 
     <div class="card__media">
-      <span class="card__ball" aria-hidden="true"></span>
+      <img class="card__watermark" :src="typeIcon" alt="" aria-hidden="true" />
       <img
         class="card__sprite"
         :src="pokemon.spriteUrl"
@@ -65,7 +67,7 @@ const primaryColor = computed(() =>
       <FavoriteButton
         class="card__fav"
         :active="favorites.isFavorite(pokemon.id)"
-        @toggle="favorites.toggle(pokemon)"
+        @toggle="toggleFavorite(pokemon)"
       />
     </div>
   </article>
@@ -88,8 +90,8 @@ const primaryColor = computed(() =>
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  /* Tinte claro del color de tipo como fondo de la card. */
-  background: color-mix(in srgb, var(--type-color) 22%, white);
+  /* Tinte del color de tipo como fondo de la card (≈50%, medido del diseño). */
+  background: color-mix(in srgb, var(--type-color) 50%, white);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
@@ -134,31 +136,24 @@ const primaryColor = computed(() =>
   width: 42%;
   display: grid;
   place-items: center;
-  /* Gradiente más intenso del color del tipo en la zona del sprite. */
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--type-color) 55%, white),
-    var(--type-color)
-  );
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  /* Color de tipo pleno con un brillo blanco (como el diseño). */
+  background:
+    radial-gradient(circle at 72% 22%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 55%),
+    var(--type-color);
+  /* Recuadro redondeado también por la izquierda (como el diseño). */
+  border-radius: var(--radius-lg);
 }
 
-/* Silueta de pokebola como marca de agua detrás del sprite. */
-.card__ball {
+/* Ícono del tipo principal, centrado en blanco detrás del sprite (como el diseño). */
+.card__watermark {
   position: absolute;
-  right: -18px;
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  border: 20px solid rgba(255, 255, 255, 0.18);
-}
-
-.card__ball::after {
-  content: '';
-  position: absolute;
-  inset: 40% -20px auto -20px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.18);
+  top: 50%;
+  left: 50%;
+  width: 96px;
+  height: 96px;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  opacity: 0.4;
 }
 
 .card__sprite {

@@ -23,15 +23,22 @@ export function extractIdFromUrl(url: string): number {
 /**
  * Construye el texto que copia el botón "Compartir": el nombre del Pokémon
  * seguido de sus atributos, todo separado por comas (requisito de la prueba).
+ * Categoría y habilidad son opcionales porque provienen de datos que se cargan
+ * al abrir el detalle (endpoints de especie y habilidad).
  */
-export function formatShareText(pokemon: Pokemon): string {
+export function formatShareText(
+  pokemon: Pokemon,
+  extras: { category?: string; ability?: string } = {},
+): string {
   const parts: string[] = [
     capitalize(pokemon.name),
     formatPokedexNumber(pokemon.id),
     ...pokemon.types.map(getTypeLabel),
     `Peso: ${pokemon.weightKg} kg`,
     `Altura: ${pokemon.heightMeters} m`,
-    ...pokemon.stats.map((stat) => `${stat.name}: ${stat.value}`),
   ]
+  if (extras.category) parts.push(`Categoría: ${extras.category}`)
+  if (extras.ability) parts.push(`Habilidad: ${extras.ability}`)
+  parts.push(...pokemon.stats.map((stat) => `${stat.name}: ${stat.value}`))
   return parts.join(', ')
 }

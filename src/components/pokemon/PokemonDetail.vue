@@ -3,8 +3,9 @@ import { computed, onMounted, ref } from 'vue'
 import type { Pokemon, SpeciesInfo } from '@/types/pokemon'
 import { usePokemonStore } from '@/stores/pokemon'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useFavoriteToggle } from '@/composables/useFavoriteToggle'
 import { useClipboard } from '@/composables/useClipboard'
-import { getTypeColor } from '@/utils/pokemonType'
+import { getTypeColor, getTypeIconUrl } from '@/utils/pokemonType'
 import { capitalize, formatPokedexNumber, formatShareText } from '@/utils/format'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -19,6 +20,7 @@ const emit = defineEmits<{ close: [] }>()
 
 const store = usePokemonStore()
 const favorites = useFavoritesStore()
+const { toggleFavorite } = useFavoriteToggle()
 const { copied, copy } = useClipboard()
 
 // Datos de especie (categoría/descripción/género): se cargan al abrir el detalle.
@@ -30,6 +32,7 @@ const primaryAbilitySlug = computed(() => props.pokemon.abilities[0] ?? '')
 const abilityLabel = ref(primaryAbilitySlug.value ? capitalize(primaryAbilitySlug.value) : '—')
 
 const typeColor = computed(() => getTypeColor(props.pokemon.types[0] ?? 'normal'))
+const typeIcon = computed(() => getTypeIconUrl(props.pokemon.types[0] ?? 'normal'))
 const image = computed(() => props.pokemon.artworkUrl || props.pokemon.spriteUrl)
 const category = computed(() => species.value?.category || '—')
 const description = computed(() => species.value?.description ?? '')
@@ -37,8 +40,10 @@ const gender = computed(() => species.value?.gender ?? null)
 
 onMounted(() => {
   // Especie (categoría/descripción/género) y habilidad en español, en paralelo.
-  if (!species.value && props.pokemon.speciesUrl) {
-    store.loadSpecies(props.pokemon.speciesUrl).then(
+  if (!species.value) {
+    // Favoritos guardados antes de tener speciesUrl: se deriva del id.
+    const speciesRef = props.pokemon.speciesUrl || `/pokemon-species/${props.pokemon.id}`
+    store.loadSpecies(speciesRef).then(
       (info) => (species.value = info),
       () => {},
     )
@@ -53,7 +58,12 @@ onMounted(() => {
 
 /** Copia nombre + atributos separados por coma (requisito de la prueba). */
 function share() {
-  copy(formatShareText(props.pokemon))
+  copy(
+    formatShareText(props.pokemon, {
+      category: species.value?.category,
+      ability: abilityLabel.value !== '—' ? abilityLabel.value : undefined,
+    }),
+  )
 }
 </script>
 
@@ -80,11 +90,11 @@ function share() {
               variant="plain"
               :active="favorites.isFavorite(pokemon.id)"
               :size="26"
-              @toggle="favorites.toggle(pokemon)"
+              @toggle="toggleFavorite(pokemon)"
             />
           </div>
         </div>
-        <span class="sheet__ball" aria-hidden="true"></span>
+        <img class="sheet__watermark" :src="typeIcon" alt="" aria-hidden="true" />
         <img class="sheet__image" :src="image" :alt="capitalize(pokemon.name)" />
       </header>
 
@@ -198,15 +208,15 @@ function share() {
   color: #fff;
 }
 
-.sheet__ball {
+.sheet__watermark {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 200px;
-  height: 200px;
-  transform: translate(-50%, -55%);
-  border-radius: 50%;
-  border: 26px solid rgba(255, 255, 255, 0.16);
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -52%);
+  object-fit: contain;
+  opacity: 0.22;
 }
 
 .sheet__image {
@@ -301,9 +311,9 @@ function share() {
     border-radius: 0;
   }
 
-  .sheet__ball {
-    width: 260px;
-    height: 260px;
+  .sheet__watermark {
+    width: 280px;
+    height: 280px;
   }
 
   .sheet__image {

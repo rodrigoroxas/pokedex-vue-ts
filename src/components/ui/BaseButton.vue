@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    variant?: 'primary' | 'secondary'
+    variant?: 'primary' | 'secondary' | 'danger'
     block?: boolean
     type?: 'button' | 'submit'
   }>(),
@@ -55,5 +55,14 @@ withDefaults(
 
 .btn--secondary:hover {
   background-color: #e3e3e3;
+}
+
+.btn--danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.btn--danger:hover {
+  filter: brightness(1.08);
 }
 </style>

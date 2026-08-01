@@ -60,4 +60,16 @@ describe('formatShareText', () => {
     // Todo el contenido debe estar unido por ", "
     expect(text.split(', ').length).toBeGreaterThan(4)
   })
+
+  it('incluye categoría y habilidad cuando se proporcionan', () => {
+    const text = formatShareText(bulbasaur, { category: 'Semilla', ability: 'Espesura' })
+    expect(text).toContain('Categoría: Semilla')
+    expect(text).toContain('Habilidad: Espesura')
+  })
+
+  it('omite categoría y habilidad si no se proporcionan', () => {
+    const text = formatShareText(bulbasaur)
+    expect(text).not.toContain('Categoría')
+    expect(text).not.toContain('Habilidad')
+  })
 })
