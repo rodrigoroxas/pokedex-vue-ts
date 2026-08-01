@@ -2,7 +2,7 @@
 
 Aplicación de **lista de Pokémon y favoritos** construida con **Vue 3 + TypeScript**, consumiendo la [PokéAPI](https://pokeapi.co/). El diseño mobile de Figma se adaptó a un layout **responsive desktop/web**.
 
-> Onboarding → Pokédex (búsqueda + scroll infinito) → Detalle (favorito ❤️ + compartir 📋) → Favoritos persistidos.
+> Splash → Onboarding → Pokédex (búsqueda, filtro y scroll infinito) → Detalle (favorito ❤️ + compartir 📋) → Favoritos persistidos (con eliminar).
 
 ---
 
@@ -59,14 +59,15 @@ Separación por capas y responsabilidades (SOLID) para que la UI no conozca los 
 ```
 src/
 ├── types/         Contratos TS de la PokéAPI + modelo de dominio (Pokemon)
-├── services/      http (fetch tipado) · pokemonApi (2 endpoints) · pokemonMapper (API → dominio)
-├── utils/         format (nº, compartir) · pokemonType (colores, etiquetas, tabla de debilidades) · storage
-├── stores/        favorites (persistido) · pokemon (índice + caché de detalles)
-├── composables/   usePokedexList · useInfiniteScroll · useClipboard
+├── services/      http (fetch tipado) · pokemonApi (índice, detalle, tipo, especie, habilidad) · pokemonMapper
+├── utils/         format (nº, compartir) · pokemonType (colores, íconos, tabla de debilidades) · search · storage
+├── stores/        favorites (persistido) · pokemon (índice + cachés) · confirm (diálogo global)
+├── composables/   usePokedexList · useInfiniteScroll · useClipboard · useFavoriteToggle
 ├── components/
-│   ├── ui/        PokeballLoader · TypeBadge · BaseButton · AppIcon · EmptyState
-│   ├── layout/    TabBar · AppSearchBar
-│   └── pokemon/   PokemonCard · PokemonDetail · FavoriteButton · StatBox · StatBars
+│   ├── ui/        PokeballLoader · TypeBadge · BaseButton · AppIcon · EmptyState · SwipeToDelete · ConfirmDialog
+│   ├── layout/    TopNav · TabBar · AppSearchBar · FilterSheet · SplashScreen
+│   └── pokemon/   PokemonCard · PokemonDetail · FavoriteButton · StatBox · StatBars · GenderBar
+├── assets/        images/types/*.svg (íconos de tipo del diseño) · styles (design tokens)
 └── views/         Onboarding · Pokedex · Favorites · ComingSoon
 ```
 
@@ -91,8 +92,10 @@ El store de **Pinia es la fuente de verdad**. Además se sincroniza con `localSt
 ### 3. Debilidades sin llamadas extra
 El detalle muestra las **debilidades** de cada Pokémon. Esa información normalmente requeriría el endpoint `/type`, pero la prueba acota el consumo a **dos llamados**. Se resolvió con una **tabla estática de efectividad de tipos** (chart Gen VI+) que calcula las debilidades en cliente combinando los uno o dos tipos del Pokémon. Cero peticiones adicionales.
 
-### 4. Detalle completo (categoría, descripción y género)
-El detalle del diseño incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` sino en **`/pokemon-species/{name}`**. Para lograr un detalle **fiel al diseño** se añade esa llamada, pero de forma eficiente: se pide **solo al abrir el detalle** (no por cada card) y se **cachea**. Así la lista sigue siendo liviana y el detalle queda completo (tipos, peso, altura, categoría, habilidad, descripción, género, debilidades y estadísticas base).
+### 4. Detalle completo (categoría, descripción, género, habilidad en español)
+El detalle del diseño incluye datos que **no vienen** en `/pokemon/{name}`: *descripción*, *categoría* y *género* están en **`/pokemon-species/{name}`**, y el nombre de la habilidad **en español** en **`/ability/{name}`** (la API la entrega en inglés en el detalle). Para lograr un detalle **fiel al diseño** se añaden esas llamadas, pero de forma eficiente: se piden **solo al abrir el detalle** (no por cada card) y se **cachean**. Así la lista sigue siendo liviana y el detalle queda completo (tipos, peso, altura, categoría, habilidad, descripción, género, debilidades y estadísticas base).
+
+> **Endpoints usados:** `/pokemon` (índice) y `/pokemon/{name}` (detalle) forman el núcleo pedido. Para respetar el **diseño** se añadieron, de forma perezosa y cacheada, `/type/{tipo}` (filtro), `/pokemon-species/{name}` (categoría/descripción/género) y `/ability/{name}` (habilidad en español). Es una decisión consciente: el core cumple con dos llamados; los extra son por fidelidad, no por el flujo base.
 
 ### 5. Búsqueda por nombre/número y filtro por tipo
 El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales, con relleno de ceros opcional (`1`, `01`, `001`).
@@ -102,8 +105,18 @@ El **filtro por tipo** (bottom sheet *"Filtra por tus preferencias"* del diseño
 ### 6. Adaptación mobile → desktop/web
 El diseño original es mobile (360px). Se adaptó con un enfoque **responsive** real: en móvil, columna única con **tab bar inferior**; en desktop, una **barra de navegación superior tipo web**, layout ancho (1120px) con las cards en **grilla de varias columnas**, onboarding en **dos columnas (landscape)** y el detalle como **modal ancho de dos columnas**. Breakpoint en 768px.
 
-### 7. Principios de código
-- **DRY**: design tokens, `AppIcon`, `EmptyState` y composables centralizan lo repetido.
+### 7. Fidelidad al diseño
+Se trató el Figma como un **sistema de diseño a adaptar**, no un mockup a calcar:
+- **Design tokens** (colores, tipografía, spacing, radios) medidos del diseño en un único lugar.
+- **Íconos de tipo**: se usan los 18 **SVG oficiales** exportados del Figma; el glifo blanco se tiñe con el color del tipo sobre un círculo blanco, como el diseño de las pastillas.
+- Cards con el color y el recuadro redondeado del diseño; ícono del tipo como marca de agua tras el sprite.
+- Splash inicial con la pokebola animada (CSS), estados vacío/error/"muy pronto" con sus ilustraciones.
+
+### 8. UX: confirmación al quitar favoritos
+Quitar un favorito es una acción con intención de borrado, así que pide **confirmación** (diálogo global reutilizable). Aplica tanto al **corazón** (al quitar) como al **eliminar** de la vista de favoritos (adaptación web del *swipe-to-delete* del diseño: se revela con hover en desktop y con deslizamiento en táctil). Añadir un favorito es instantáneo (no es destructivo).
+
+### 9. Principios de código
+- **DRY**: design tokens, `AppIcon`, `EmptyState`, composables y stores centralizan lo repetido.
 - **KISS**: solo se modela de la API lo que la app usa; sin abstracciones prematuras.
 - **SOLID**: cada capa tiene una responsabilidad; los componentes dependen de abstracciones (`services`, `stores`), no de `fetch` ni de `localStorage` directamente.
 
@@ -111,29 +124,32 @@ El diseño original es mobile (360px). Se adaptó con un enfoque **responsive** 
 
 ## ✅ Testing
 
-Tests unitarios con Vitest sobre lo de mayor valor:
-- **Lógica de dominio**: cálculo de debilidades (tabla de tipos), formateo y **texto de compartir**.
-- **Mapper**: conversión de unidades (dm→m, hg→kg) y normalización.
+Tests unitarios con Vitest sobre lo de mayor valor (**39 tests**, 7 archivos):
+- **Lógica de dominio**: cálculo de debilidades (tabla de tipos), etiquetas de tipo.
+- **Búsqueda/filtro**: coincidencia por nombre y número, filtro por tipo (`filterPokemonList`).
+- **Formato**: número de Pokédex, id desde URL y **texto de compartir** (con categoría/habilidad).
+- **Mapper**: conversión de unidades (dm→m, hg→kg), orden de tipos y `mapSpecies` (categoría/género).
+- **Servicio**: endpoint `/type` (con mock de `fetch`).
 - **Store de favoritos**: alternar, no duplicar, persistir e hidratar desde `localStorage`.
 - **Componente**: `TypeBadge` (etiqueta, color y tamaño).
 
 ```bash
-npx vitest run   # 22 tests
+npx vitest run   # 39 tests
 ```
 
 ---
 
 ## 📁 Funcionalidades
 
-- [x] Onboarding de bienvenida (2 pasos)
-- [x] Pantalla de carga con **pokebola animada en CSS**
+- [x] **Splash** inicial con pokebola animada en CSS + onboarding de bienvenida (2 pasos)
 - [x] Lista de Pokémon con **búsqueda (nombre o número)**, **filtro por tipo** y **scroll infinito**
-- [x] Detalle con descripción, tipos, peso, altura, categoría, habilidad, género, stats y debilidades
-- [x] **Favorito** (❤️) con persistencia
+- [x] Detalle con descripción, tipos, peso, altura, categoría, habilidad (ES), género, stats y debilidades
+- [x] **Favorito** (❤️) con persistencia y **confirmación al quitar**
 - [x] Botón **Compartir**: copia nombre + atributos separados por coma al portapapeles
-- [x] Vista de **Favoritos** con estado vacío
-- [x] Estado de **error** con reintento
-- [x] Responsive **mobile → desktop**
+- [x] Vista de **Favoritos** con búsqueda/filtro, **eliminar** (swipe/hover) y estado vacío
+- [x] Estados de **error** (con reintento) y **"muy pronto"**
+- [x] Responsive **mobile → desktop** (tab bar / nav superior)
+- [x] Íconos de tipo con los **SVG del diseño**
 - [x] Accesibilidad: roles ARIA, foco visible, `prefers-reduced-motion`
 
 ---
