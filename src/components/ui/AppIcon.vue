@@ -17,6 +17,8 @@ export type IconName =
   | 'share'
   | 'trash'
   | 'close'
+  | 'filter'
+  | 'chevron-down'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: number }>(), { size: 24 })
 
@@ -31,6 +33,8 @@ const ICON_PATHS: Record<IconName, string> = {
   share: 'M8.6 13.5l6.8 4M15.4 6.5l-6.8 4M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
   trash: 'M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6',
   close: 'M18 6 6 18M6 6l12 12',
+  filter: 'M22 4H2l8 9.46V20l4-2v-4.54z',
+  'chevron-down': 'm6 9 6 6 6-6',
 }
 
 const isFilled = computed(() => props.name === 'heart-filled')

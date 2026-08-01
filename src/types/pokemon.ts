@@ -31,6 +31,17 @@ export interface NamedApiResource {
   url: string
 }
 
+/** Sub-estructura de GET /type/{tipo}: relación tipo → Pokémon. */
+export interface TypePokemonSlot {
+  slot: number
+  pokemon: NamedApiResource
+}
+
+/** Respuesta de GET /type/{tipo} (solo se consume la lista de Pokémon). */
+export interface TypeResponse {
+  pokemon: TypePokemonSlot[]
+}
+
 /** Respuesta de GET /pokemon?limit&offset */
 export interface PokemonListResponse {
   count: number

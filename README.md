@@ -94,8 +94,10 @@ El detalle muestra las **debilidades** de cada Pokémon. Esa información normal
 ### 4. Fidelidad al diseño y campos fuera de alcance
 El diseño del detalle incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` (requieren `/pokemon-species`, fuera de los dos endpoints permitidos). Para respetar esa restricción, el detalle se construye con lo que **sí** entrega el endpoint autorizado (tipos, peso, altura, habilidades y **estadísticas base**) más las debilidades calculadas. Es una decisión consciente: priorizar la regla de los dos llamados.
 
-### 5. Búsqueda por nombre y número
-El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales. La coincidencia es instantánea y admite el número con o sin relleno de ceros (`1`, `01`, `001`).
+### 5. Búsqueda por nombre/número y filtro por tipo
+El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales, con relleno de ceros opcional (`1`, `01`, `001`).
+
+El **filtro por tipo** (bottom sheet *"Filtra por tus preferencias"* del diseño) sí requiere un endpoint extra: `GET /type/{tipo}` devuelve todos los Pokémon de un tipo en **una** llamada (cacheada por tipo). Como el índice base no incluye el tipo de cada Pokémon, esta es la forma correcta de ofrecer un filtro **completo** sin descargar los ~1300 detalles. Se añadió **por fidelidad al diseño**, es una llamada de tipo "listado" análoga a `/pokemon`, y se combina con la búsqueda de texto. Búsqueda y filtro comparten la misma tubería de filtrado/paginación en cliente.
 
 ### 6. Adaptación mobile → desktop/web
 El diseño original es mobile (360px). Se adaptó con un enfoque **responsive** real: en móvil, columna única con **tab bar inferior**; en desktop, una **barra de navegación superior tipo web**, layout ancho (1120px) con las cards en **grilla de varias columnas**, onboarding en **dos columnas (landscape)** y el detalle como **modal ancho de dos columnas**. Breakpoint en 768px.
@@ -125,7 +127,7 @@ npx vitest run   # 22 tests
 
 - [x] Onboarding de bienvenida (2 pasos)
 - [x] Pantalla de carga con **pokebola animada en CSS**
-- [x] Lista de Pokémon con **búsqueda (nombre o número)** y **scroll infinito**
+- [x] Lista de Pokémon con **búsqueda (nombre o número)**, **filtro por tipo** y **scroll infinito**
 - [x] Detalle con tipos, peso, altura, habilidades, stats y debilidades
 - [x] **Favorito** (❤️) con persistencia
 - [x] Botón **Compartir**: copia nombre + atributos separados por coma al portapapeles

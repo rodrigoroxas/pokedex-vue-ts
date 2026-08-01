@@ -1,7 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { NamedApiResource, Pokemon, RequestStatus } from '@/types/pokemon'
-import { fetchPokemonByName, fetchPokemonIndex } from '@/services/pokemonApi'
+import {
+  fetchPokemonByName,
+  fetchPokemonIndex,
+  fetchPokemonNamesByType,
+} from '@/services/pokemonApi'
 
 /**
  * Store de datos de Pokémon: mantiene el índice de nombres y una caché de
@@ -15,6 +19,9 @@ export const usePokemonStore = defineStore('pokemon', () => {
   const detailCache = ref(new Map<string, Pokemon>())
   // Peticiones de detalle en vuelo, para deduplicar cargas concurrentes.
   const pendingDetails = new Map<string, Promise<Pokemon>>()
+
+  // Caché de nombres por tipo (para el filtro), un fetch por tipo como máximo.
+  const typeNamesCache = new Map<string, string[]>()
 
   /** Carga el índice completo de nombres una sola vez. */
   async function loadIndex(): Promise<void> {
@@ -54,5 +61,14 @@ export const usePokemonStore = defineStore('pokemon', () => {
     return detailCache.value.get(name)
   }
 
-  return { index, indexStatus, detailCache, loadIndex, loadDetail, getCached }
+  /** Devuelve (cacheados) los nombres de los Pokémon de un tipo. */
+  async function loadNamesByType(type: string): Promise<string[]> {
+    const cached = typeNamesCache.get(type)
+    if (cached) return cached
+    const names = await fetchPokemonNamesByType(type)
+    typeNamesCache.set(type, names)
+    return names
+  }
+
+  return { index, indexStatus, detailCache, loadIndex, loadDetail, getCached, loadNamesByType }
 })

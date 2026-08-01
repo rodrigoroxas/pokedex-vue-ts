@@ -1,4 +1,10 @@
-import type { NamedApiResource, Pokemon, PokemonDetailResponse, PokemonListResponse } from '@/types/pokemon'
+import type {
+  NamedApiResource,
+  Pokemon,
+  PokemonDetailResponse,
+  PokemonListResponse,
+  TypeResponse,
+} from '@/types/pokemon'
 import { httpGet } from './http'
 import { mapPokemonDetail } from './pokemonMapper'
 
@@ -26,4 +32,17 @@ export async function fetchPokemonIndex(signal?: AbortSignal): Promise<NamedApiR
 export async function fetchPokemonByName(name: string, signal?: AbortSignal): Promise<Pokemon> {
   const raw = await httpGet<PokemonDetailResponse>(`/pokemon/${name}`, signal)
   return mapPokemonDetail(raw)
+}
+
+/**
+ * Trae los nombres de todos los Pokémon de un tipo: GET /type/{tipo}.
+ *
+ * Nota de alcance: el diseño incluye un filtro por tipo. Como el índice base
+ * no trae el tipo de cada Pokémon, un filtro completo requiere este endpoint
+ * adicional (una única llamada por tipo, luego cacheada). Se añade por
+ * fidelidad al diseño, sin afectar el flujo principal de dos llamados.
+ */
+export async function fetchPokemonNamesByType(type: string, signal?: AbortSignal): Promise<string[]> {
+  const data = await httpGet<TypeResponse>(`/type/${type}`, signal)
+  return data.pokemon.map((slot) => slot.pokemon.name)
 }
