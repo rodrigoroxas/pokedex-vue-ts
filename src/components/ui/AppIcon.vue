@@ -26,6 +26,7 @@ export type IconName =
   | 'pokeball'
   | 'male'
   | 'female'
+  | 'check'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: number }>(), { size: 24 })
 
@@ -49,6 +50,7 @@ const ICON_PATHS: Record<IconName, string> = {
   pokeball: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h6M15 12h6M15 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0Z',
   male: 'M10.5 21a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11ZM14.5 9.5 21 3M15 3h6v6',
   female: 'M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10ZM12 13v8M9 18h6',
+  check: 'M20 6 9 17l-5-5',
 }
 
 const isFilled = computed(() => props.name === 'heart-filled')

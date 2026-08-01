@@ -5,6 +5,7 @@ import { usePokemonStore } from '@/stores/pokemon'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useFavoriteToggle } from '@/composables/useFavoriteToggle'
 import { useClipboard } from '@/composables/useClipboard'
+import { useToastStore } from '@/stores/toast'
 import { getTypeColor, getTypeIconUrl } from '@/utils/pokemonType'
 import { capitalize, formatPokedexNumber, formatShareText } from '@/utils/format'
 import AppIcon from '@/components/ui/AppIcon.vue'
@@ -21,7 +22,8 @@ const emit = defineEmits<{ close: [] }>()
 const store = usePokemonStore()
 const favorites = useFavoritesStore()
 const { toggleFavorite } = useFavoriteToggle()
-const { copied, copy } = useClipboard()
+const { copy, error } = useClipboard()
+const toast = useToastStore()
 
 // Datos de especie (categoría/descripción/género): se cargan al abrir el detalle.
 const species = ref<SpeciesInfo | null>(props.pokemon.species ?? null)
@@ -57,13 +59,14 @@ onMounted(() => {
 })
 
 /** Copia nombre + atributos separados por coma (requisito de la prueba). */
-function share() {
-  copy(
+async function share() {
+  await copy(
     formatShareText(props.pokemon, {
       category: species.value?.category,
       ability: abilityLabel.value !== '—' ? abilityLabel.value : undefined,
     }),
   )
+  toast.show(error.value ? 'No se pudo copiar' : 'Copiado al portapapeles')
 }
 </script>
 
@@ -141,7 +144,7 @@ function share() {
 
         <BaseButton block class="sheet__share" @click="share">
           <AppIcon name="share" :size="20" />
-          {{ copied ? '¡Copiado al portapapeles!' : 'Compartir' }}
+          Compartir
         </BaseButton>
       </div>
     </section>

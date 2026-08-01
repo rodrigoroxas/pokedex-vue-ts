@@ -5,6 +5,7 @@ import TopNav from '@/components/layout/TopNav.vue'
 import TabBar from '@/components/layout/TabBar.vue'
 import SplashScreen from '@/components/layout/SplashScreen.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import AppToast from '@/components/ui/AppToast.vue'
 import { useConfirmStore } from '@/stores/confirm'
 
 const route = useRoute()
@@ -54,6 +55,9 @@ onMounted(() => {
     <Transition name="fade">
       <SplashScreen v-if="booting" />
     </Transition>
+
+    <!-- Aviso breve (toast) global -->
+    <AppToast />
   </div>
 </template>
 
