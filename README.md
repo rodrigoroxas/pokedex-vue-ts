@@ -12,7 +12,7 @@ Aplicación de **lista de Pokémon y favoritos** construida con **Vue 3 + TypeSc
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/<TU-USUARIO>/pokedex-vue-ts.git
+git clone https://github.com/rodrigoroxas/pokedex-vue-ts.git
 cd pokedex-vue-ts
 
 # 2. Instalar dependencias
