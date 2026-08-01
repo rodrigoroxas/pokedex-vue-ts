@@ -1,47 +1,74 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import TopNav from '@/components/layout/TopNav.vue'
 import TabBar from '@/components/layout/TabBar.vue'
 
 const route = useRoute()
 
-/** La barra inferior se muestra salvo en rutas que la desactivan (onboarding). */
+/** Las barras de navegación se ocultan en rutas sin "chrome" (onboarding). */
 const showChrome = computed(() => route.meta.chrome !== false)
 </script>
 
 <template>
-  <div class="app-shell">
-    <main class="app-viewport">
-      <RouterView v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
-      </RouterView>
+  <div class="layout" :class="{ 'layout--bare': !showChrome }">
+    <!-- Navegación web (desktop) -->
+    <TopNav v-if="showChrome" class="layout__topnav" />
+
+    <main class="layout__main">
+      <div class="layout__container">
+        <RouterView v-slot="{ Component }">
+          <Transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </RouterView>
+      </div>
     </main>
-    <TabBar v-if="showChrome" class="app-tabbar" />
+
+    <!-- Navegación móvil (bottom tab bar) -->
+    <TabBar v-if="showChrome" class="layout__tabbar" />
   </div>
 </template>
 
 <style scoped>
-.app-shell {
+.layout {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: var(--app-max-width);
   min-height: 100dvh;
-  margin: 0 auto;
-  background: var(--color-surface);
-  position: relative;
+  background: #eef1f5;
 }
 
-.app-viewport {
+.layout__main {
   flex: 1;
-  overflow-x: hidden;
+  /* Espacio para el tab bar fijo en móvil. */
+  padding-bottom: var(--tabbar-height);
 }
 
-.app-tabbar {
-  position: sticky;
+.layout__container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+/* Rutas sin navegación (onboarding): contenido a pantalla completa. */
+.layout--bare .layout__main {
+  padding-bottom: 0;
+}
+
+.layout--bare .layout__container {
+  max-width: none;
+}
+
+/* ---- Navegación: móvil vs. web ---- */
+.layout__topnav {
+  display: none;
+}
+
+.layout__tabbar {
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   z-index: var(--z-tabbar);
 }
 
@@ -55,12 +82,16 @@ const showChrome = computed(() => route.meta.chrome !== false)
   opacity: 0;
 }
 
-/* ---- Adaptación a desktop/web ---- */
-@media (min-width: 720px) {
-  .app-shell {
-    max-width: 960px;
-    min-height: 100dvh;
-    box-shadow: 0 0 60px rgba(18, 18, 18, 0.08);
+/* ---- Layout web/desktop ---- */
+@media (min-width: 768px) {
+  .layout__topnav {
+    display: block;
+  }
+  .layout__tabbar {
+    display: none;
+  }
+  .layout__main {
+    padding-bottom: var(--space-xl);
   }
 }
 </style>

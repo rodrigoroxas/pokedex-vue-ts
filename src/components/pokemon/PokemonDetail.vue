@@ -241,14 +241,42 @@ function share() {
   margin-top: var(--space-xs);
 }
 
-/* En pantallas anchas el detalle se muestra como modal centrado. */
-@media (min-width: 600px) {
+/* En pantallas anchas el detalle es un modal ancho de dos columnas:
+   la cabecera con el artwork a la izquierda y la información a la derecha. */
+@media (min-width: 768px) {
   .sheet-overlay {
     align-items: center;
+    padding: var(--space-lg);
   }
+
   .sheet {
+    max-width: 860px;
+    max-height: 86vh;
     border-radius: var(--radius-lg);
-    max-height: 88vh;
+    display: grid;
+    grid-template-columns: 44% 56%;
+    overflow: hidden;
+  }
+
+  .sheet__header {
+    height: 100%;
+    min-height: 0;
+    border-radius: 0;
+  }
+
+  .sheet__ball {
+    width: 260px;
+    height: 260px;
+  }
+
+  .sheet__image {
+    width: 240px;
+    height: 240px;
+  }
+
+  .sheet__body {
+    min-height: 0;
+    overflow-y: auto;
   }
 }
 </style>

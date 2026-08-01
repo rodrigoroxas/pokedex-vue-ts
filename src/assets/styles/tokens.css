@@ -71,9 +71,15 @@
   --shadow-raised: 0 -4px 24px rgba(18, 18, 18, 0.12);
 
   /* ---- Layout ---- */
-  --app-max-width: 420px; /* ancho "mobile" del diseño, base del escalado a desktop */
-  --tabbar-height: 77px;
+  --app-max-width: 420px; /* ancho "mobile" del diseño */
+  --content-max-width: 1120px; /* ancho del contenido en desktop/web */
+  --tabbar-height: 72px; /* navegación inferior (móvil) */
+  --topnav-height: 68px; /* barra superior (desktop/web) */
   --z-tabbar: 20;
+  --z-topnav: 30;
   --z-overlay: 40;
   --z-sheet: 50;
+
+  /* Punto de quiebre a partir del cual se usa el layout web. */
+  --breakpoint-desktop: 768px;
 }

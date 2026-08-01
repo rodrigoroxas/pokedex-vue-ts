@@ -50,7 +50,15 @@ onMounted(loadIndex)
     <!-- Contenido -->
     <template v-else>
       <header class="pokedex__header">
-        <AppSearchBar v-model="searchQuery" />
+        <div class="pokedex__bar">
+          <div class="pokedex__heading">
+            <h1 class="pokedex__title">Pokédex</h1>
+            <p class="pokedex__subtitle">
+              Explora todos los Pokémon y guarda tus favoritos.
+            </p>
+          </div>
+          <AppSearchBar v-model="searchQuery" class="pokedex__search" />
+        </div>
         <div v-if="searchQuery" class="pokedex__results">
           <span>Se han encontrado {{ resultCount }} resultados</span>
           <button class="pokedex__clear" type="button" @click="clearSearch">Borrar filtro</button>
@@ -90,7 +98,7 @@ onMounted(loadIndex)
 .pokedex__center {
   display: grid;
   place-items: center;
-  min-height: 70vh;
+  min-height: 60vh;
 }
 
 .pokedex__header {
@@ -101,7 +109,20 @@ onMounted(loadIndex)
   flex-direction: column;
   gap: var(--space-sm);
   padding-bottom: var(--space-md);
-  background: var(--color-surface);
+  background: #eef1f5;
+}
+
+.pokedex__heading {
+  display: none;
+}
+
+.pokedex__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.pokedex__subtitle {
+  color: var(--color-text-secondary);
 }
 
 .pokedex__results {
@@ -119,8 +140,42 @@ onMounted(loadIndex)
 
 .pokedex__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-sm);
+}
+
+/* ---- Layout web/desktop ---- */
+@media (min-width: 768px) {
+  .pokedex {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .pokedex__header {
+    position: static;
+    gap: var(--space-md);
+    padding-bottom: var(--space-lg);
+  }
+
+  /* Título a la izquierda y búsqueda a la derecha (barra web). */
+  .pokedex__bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-lg);
+  }
+
+  .pokedex__heading {
+    display: block;
+  }
+
+  .pokedex__search {
+    width: 360px;
+    flex-shrink: 0;
+  }
+
+  .pokedex__grid {
+    gap: var(--space-md);
+  }
 }
 
 .pokedex__sentinel {

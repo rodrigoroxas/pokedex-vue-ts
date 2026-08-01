@@ -1,6 +1,8 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePokemonStore } from '@/stores/pokemon'
+import { extractIdFromUrl } from '@/utils/format'
+import { pokemonMatchesQuery } from '@/utils/search'
 
 const PAGE_SIZE = 30
 
@@ -23,7 +25,9 @@ export function usePokedexList() {
 
   const filteredIndex = computed(() => {
     if (!normalizedQuery.value) return index.value
-    return index.value.filter((item) => item.name.includes(normalizedQuery.value))
+    return index.value.filter((item) =>
+      pokemonMatchesQuery(item.name, extractIdFromUrl(item.url), normalizedQuery.value),
+    )
   })
 
   const visibleItems = computed(() => filteredIndex.value.slice(0, visibleCount.value))

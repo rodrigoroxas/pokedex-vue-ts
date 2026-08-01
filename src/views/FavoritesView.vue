@@ -17,6 +17,9 @@ const selected = ref<Pokemon | null>(null)
   <div class="favorites">
     <header class="favorites__header">
       <h1 class="favorites__title">Favoritos</h1>
+      <p class="favorites__subtitle">
+        {{ isEmpty ? 'Aún no tienes Pokémon favoritos.' : `${favorites.length} Pokémon guardados.` }}
+      </p>
     </header>
 
     <EmptyState
@@ -52,10 +55,39 @@ const selected = ref<Pokemon | null>(null)
   font-weight: var(--font-weight-bold);
 }
 
+.favorites__subtitle {
+  display: none;
+  color: var(--color-text-secondary);
+}
+
 .favorites__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-sm);
+}
+
+/* ---- Layout web/desktop ---- */
+@media (min-width: 768px) {
+  .favorites {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .favorites__header {
+    text-align: left;
+    padding-bottom: var(--space-lg);
+  }
+
+  .favorites__title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .favorites__subtitle {
+    display: block;
+  }
+
+  .favorites__grid {
+    gap: var(--space-md);
+  }
 }
 
 /* Reutiliza la transición del sheet (definida a nivel de la vista Pokédex). */

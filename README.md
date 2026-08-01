@@ -79,10 +79,13 @@ El detalle muestra las **debilidades** de cada Pokémon. Esa información normal
 ### 4. Fidelidad al diseño y campos fuera de alcance
 El diseño del detalle incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` (requieren `/pokemon-species`, fuera de los dos endpoints permitidos). Para respetar esa restricción, el detalle se construye con lo que **sí** entrega el endpoint autorizado (tipos, peso, altura, habilidades y **estadísticas base**) más las debilidades calculadas. Es una decisión consciente: priorizar la regla de los dos llamados.
 
-### 5. Adaptación mobile → desktop/web
-El diseño original es mobile (360px). Se adaptó con un enfoque **responsive**: en móvil es una columna; en pantallas anchas el contenedor crece y las cards fluyen en una **grilla de varias columnas** (`grid` con `auto-fill`), y el detalle pasa de *bottom sheet* a **modal centrado**.
+### 5. Búsqueda por nombre y número (no por tipo)
+El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales. El **filtro por tipo** que aparece en el diseño se dejó fuera **a propósito**: el índice no incluye el tipo, así que un filtro por tipo completo exigiría el endpoint `/type` (un tercer llamado). Se priorizó la restricción de dos endpoints por sobre esa funcionalidad.
 
-### 6. Principios de código
+### 6. Adaptación mobile → desktop/web
+El diseño original es mobile (360px). Se adaptó con un enfoque **responsive** real: en móvil, columna única con **tab bar inferior**; en desktop, una **barra de navegación superior tipo web**, layout ancho (1120px) con las cards en **grilla de varias columnas**, onboarding en **dos columnas (landscape)** y el detalle como **modal ancho de dos columnas**. Breakpoint en 768px.
+
+### 7. Principios de código
 - **DRY**: design tokens, `AppIcon`, `EmptyState` y composables centralizan lo repetido.
 - **KISS**: solo se modela de la API lo que la app usa; sin abstracciones prematuras.
 - **SOLID**: cada capa tiene una responsabilidad; los componentes dependen de abstracciones (`services`, `stores`), no de `fetch` ni de `localStorage` directamente.
@@ -107,7 +110,7 @@ npx vitest run   # 22 tests
 
 - [x] Onboarding de bienvenida (2 pasos)
 - [x] Pantalla de carga con **pokebola animada en CSS**
-- [x] Lista de Pokémon con **búsqueda** y **scroll infinito**
+- [x] Lista de Pokémon con **búsqueda (nombre o número)** y **scroll infinito**
 - [x] Detalle con tipos, peso, altura, habilidades, stats y debilidades
 - [x] **Favorito** (❤️) con persistencia
 - [x] Botón **Compartir**: copia nombre + atributos separados por coma al portapapeles

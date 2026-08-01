@@ -4,7 +4,7 @@ import AppIcon from '@/components/ui/AppIcon.vue'
 const model = defineModel<string>({ default: '' })
 
 withDefaults(defineProps<{ placeholder?: string }>(), {
-  placeholder: 'Buscar Pokémon...',
+  placeholder: 'Buscar por nombre o número...',
 })
 </script>
 
