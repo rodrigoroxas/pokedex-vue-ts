@@ -8,27 +8,22 @@ const props = withDefaults(
   { size: 'md' },
 )
 
-/** Glifo representativo por tipo (evita mantener 18 SVGs a mano). */
-const TYPE_ICONS: Record<PokemonTypeName, string> = {
-  normal: '⭐',
-  fire: '🔥',
-  water: '💧',
-  grass: '🌿',
-  electric: '⚡',
-  ice: '❄️',
-  fighting: '🥊',
-  poison: '☠️',
-  ground: '⛰️',
-  flying: '🪽',
-  psychic: '🔮',
-  bug: '🐛',
-  rock: '🪨',
-  ghost: '👻',
-  dragon: '🐉',
-  dark: '🌙',
-  steel: '⚙️',
-  fairy: '✨',
-}
+/**
+ * Íconos de tipo (SVG del diseño de Figma) cargados con glob de Vite.
+ * Cada archivo es un glifo blanco; se muestra sobre el círculo de la pastilla.
+ */
+const iconUrls = import.meta.glob('../../assets/images/types/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
+const TYPE_ICONS: Record<string, string> = Object.fromEntries(
+  Object.entries(iconUrls).map(([path, url]) => [
+    path.split('/').pop()!.replace('.svg', ''),
+    url,
+  ]),
+)
 
 const color = computed(() => getTypeColor(props.type))
 const label = computed(() => getTypeLabel(props.type))
@@ -37,7 +32,9 @@ const icon = computed(() => TYPE_ICONS[props.type])
 
 <template>
   <span class="badge" :class="`badge--${size}`" :style="{ backgroundColor: color }">
-    <span class="badge__icon" aria-hidden="true">{{ icon }}</span>
+    <span class="badge__icon">
+      <img v-if="icon" :src="icon" alt="" />
+    </span>
     <span class="badge__label">{{ label }}</span>
   </span>
 </template>
@@ -75,13 +72,17 @@ const icon = computed(() => TYPE_ICONS[props.type])
 .badge--md .badge__icon {
   width: 18px;
   height: 18px;
-  font-size: 10px;
 }
 
 .badge--sm .badge__icon {
   width: 15px;
   height: 15px;
-  font-size: 8px;
+}
+
+.badge__icon img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
 }
 
 .badge__label {
