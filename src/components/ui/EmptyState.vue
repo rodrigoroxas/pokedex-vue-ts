@@ -1,18 +1,26 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 /**
  * Estado ilustrado reutilizable para "sin favoritos", "error" y "muy pronto".
- * La ilustración es el Magikarp del diseño, en escala de grises vía CSS.
+ * La ilustración (un Pokémon del diseño) se muestra en escala de grises vía
+ * CSS. Por defecto es Magikarp (id 129); se puede cambiar con `artworkId`
+ * para respetar el diseño (p.ej. Jigglypuff, id 39, en la pantalla "muy pronto").
  */
-withDefaults(defineProps<{ title: string; description?: string }>(), { description: '' })
+const props = withDefaults(
+  defineProps<{ title: string; description?: string; artworkId?: number }>(),
+  { description: '', artworkId: 129 },
+)
 
-// Artwork oficial de Magikarp (id 129) servido por PokéAPI.
-const MAGIKARP_URL =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png'
+const artworkUrl = computed(
+  () =>
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${props.artworkId}.png`,
+)
 </script>
 
 <template>
   <div class="empty">
-    <img class="empty__art" :src="MAGIKARP_URL" alt="" />
+    <img class="empty__art" :src="artworkUrl" alt="" />
     <h2 class="empty__title">{{ title }}</h2>
     <p v-if="description" class="empty__desc">{{ description }}</p>
     <div v-if="$slots.action" class="empty__action">

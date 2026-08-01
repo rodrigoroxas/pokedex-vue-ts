@@ -5,6 +5,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 <template>
   <div class="coming-soon">
     <EmptyState
+      :artwork-id="39"
       title="¡Muy pronto disponible!"
       description="Estamos trabajando para traerte esta sección. Vuelve más adelante para descubrir todas las novedades."
     />

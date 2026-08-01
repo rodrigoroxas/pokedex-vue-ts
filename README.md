@@ -8,17 +8,32 @@ Aplicación de **lista de Pokémon y favoritos** construida con **Vue 3 + TypeSc
 
 ## 🚀 Puesta en marcha
 
-```bash
-npm install      # instalar dependencias
-npm run dev      # servidor de desarrollo (http://localhost:5173)
+**Requisitos:** [Node.js](https://nodejs.org/) **22+** y npm.
 
-npm run build       # build de producción
-npm run type-check  # chequeo de tipos (vue-tsc)
-npm run lint        # oxlint + eslint
-npx vitest run      # tests unitarios
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/<TU-USUARIO>/pokedex-vue-ts.git
+cd pokedex-vue-ts
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Levantar el servidor de desarrollo → http://localhost:5173
+npm run dev
 ```
 
-Requiere **Node 22+**.
+No requiere variables de entorno ni configuración adicional: la app consume la PokéAPI pública directamente.
+
+### Otros scripts
+
+```bash
+npm run build       # build de producción (genera /dist)
+npm run preview     # previsualiza el build de producción
+npm run type-check  # chequeo de tipos (vue-tsc)
+npm run lint        # oxlint + eslint
+npx vitest run      # tests unitarios (una corrida)
+npm run test:unit   # tests en modo watch
+```
 
 ---
 
