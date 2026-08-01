@@ -15,6 +15,7 @@ function makePokemon(id: number, name: string): Pokemon {
     spriteUrl: '',
     artworkUrl: '',
     weaknesses: [],
+    speciesUrl: '',
   }
 }
 

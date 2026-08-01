@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Pokemon } from '@/types/pokemon'
+import { computed, onMounted, ref } from 'vue'
+import type { Pokemon, SpeciesInfo } from '@/types/pokemon'
+import { usePokemonStore } from '@/stores/pokemon'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useClipboard } from '@/composables/useClipboard'
 import { getTypeColor } from '@/utils/pokemonType'
@@ -11,16 +12,44 @@ import TypeBadge from '@/components/ui/TypeBadge.vue'
 import FavoriteButton from '@/components/pokemon/FavoriteButton.vue'
 import StatBox from '@/components/pokemon/StatBox.vue'
 import StatBars from '@/components/pokemon/StatBars.vue'
+import GenderBar from '@/components/pokemon/GenderBar.vue'
 
 const props = defineProps<{ pokemon: Pokemon }>()
 const emit = defineEmits<{ close: [] }>()
 
+const store = usePokemonStore()
 const favorites = useFavoritesStore()
 const { copied, copy } = useClipboard()
 
+// Datos de especie (categoría/descripción/género): se cargan al abrir el detalle.
+const species = ref<SpeciesInfo | null>(props.pokemon.species ?? null)
+
+// Nombre de la habilidad: inicia con el nombre en inglés capitalizado y se
+// reemplaza por el traducido al español una vez cargado desde /ability.
+const primaryAbilitySlug = computed(() => props.pokemon.abilities[0] ?? '')
+const abilityLabel = ref(primaryAbilitySlug.value ? capitalize(primaryAbilitySlug.value) : '—')
+
 const typeColor = computed(() => getTypeColor(props.pokemon.types[0] ?? 'normal'))
 const image = computed(() => props.pokemon.artworkUrl || props.pokemon.spriteUrl)
-const abilities = computed(() => props.pokemon.abilities.map(capitalize).join(', '))
+const category = computed(() => species.value?.category || '—')
+const description = computed(() => species.value?.description ?? '')
+const gender = computed(() => species.value?.gender ?? null)
+
+onMounted(() => {
+  // Especie (categoría/descripción/género) y habilidad en español, en paralelo.
+  if (!species.value && props.pokemon.speciesUrl) {
+    store.loadSpecies(props.pokemon.speciesUrl).then(
+      (info) => (species.value = info),
+      () => {},
+    )
+  }
+  if (primaryAbilitySlug.value) {
+    store.loadAbilityName(primaryAbilitySlug.value).then(
+      (name) => (abilityLabel.value = name),
+      () => {},
+    )
+  }
+})
 
 /** Copia nombre + atributos separados por coma (requisito de la prueba). */
 function share() {
@@ -70,20 +99,18 @@ function share() {
           <TypeBadge v-for="type in pokemon.types" :key="type" :type="type" />
         </div>
 
+        <p v-if="description" class="sheet__description">{{ description }}</p>
+
+        <hr class="sheet__divider" />
+
         <div class="sheet__grid">
-          <StatBox label="Peso" :value="`${pokemon.weightKg} kg`" />
-          <StatBox label="Altura" :value="`${pokemon.heightMeters} m`" />
+          <StatBox icon="weight" label="Peso" :value="`${pokemon.weightKg} kg`" />
+          <StatBox icon="ruler" label="Altura" :value="`${pokemon.heightMeters} m`" />
+          <StatBox icon="category" label="Categoría" :value="category" />
+          <StatBox icon="pokeball" label="Habilidad" :value="abilityLabel" />
         </div>
 
-        <div class="sheet__section">
-          <h3 class="sheet__section-title">Habilidades</h3>
-          <div class="sheet__abilities">{{ abilities }}</div>
-        </div>
-
-        <div class="sheet__section">
-          <h3 class="sheet__section-title">Estadísticas base</h3>
-          <StatBars :stats="pokemon.stats" :color="typeColor" />
-        </div>
+        <GenderBar v-if="gender" :gender="gender" />
 
         <div v-if="pokemon.weaknesses.length" class="sheet__section">
           <h3 class="sheet__section-title">Debilidades</h3>
@@ -95,6 +122,11 @@ function share() {
               size="sm"
             />
           </div>
+        </div>
+
+        <div class="sheet__section">
+          <h3 class="sheet__section-title">Estadísticas base</h3>
+          <StatBars :stats="pokemon.stats" :color="typeColor" />
         </div>
 
         <BaseButton block class="sheet__share" @click="share">
@@ -233,8 +265,13 @@ function share() {
   font-weight: var(--font-weight-semibold);
 }
 
-.sheet__abilities {
+.sheet__description {
   color: var(--color-text-secondary);
+}
+
+.sheet__divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
 }
 
 .sheet__share {

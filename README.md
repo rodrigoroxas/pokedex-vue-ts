@@ -91,8 +91,8 @@ El store de **Pinia es la fuente de verdad**. Además se sincroniza con `localSt
 ### 3. Debilidades sin llamadas extra
 El detalle muestra las **debilidades** de cada Pokémon. Esa información normalmente requeriría el endpoint `/type`, pero la prueba acota el consumo a **dos llamados**. Se resolvió con una **tabla estática de efectividad de tipos** (chart Gen VI+) que calcula las debilidades en cliente combinando los uno o dos tipos del Pokémon. Cero peticiones adicionales.
 
-### 4. Fidelidad al diseño y campos fuera de alcance
-El diseño del detalle incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` (requieren `/pokemon-species`, fuera de los dos endpoints permitidos). Para respetar esa restricción, el detalle se construye con lo que **sí** entrega el endpoint autorizado (tipos, peso, altura, habilidades y **estadísticas base**) más las debilidades calculadas. Es una decisión consciente: priorizar la regla de los dos llamados.
+### 4. Detalle completo (categoría, descripción y género)
+El detalle del diseño incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` sino en **`/pokemon-species/{name}`**. Para lograr un detalle **fiel al diseño** se añade esa llamada, pero de forma eficiente: se pide **solo al abrir el detalle** (no por cada card) y se **cachea**. Así la lista sigue siendo liviana y el detalle queda completo (tipos, peso, altura, categoría, habilidad, descripción, género, debilidades y estadísticas base).
 
 ### 5. Búsqueda por nombre/número y filtro por tipo
 El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales, con relleno de ceros opcional (`1`, `01`, `001`).
@@ -128,7 +128,7 @@ npx vitest run   # 22 tests
 - [x] Onboarding de bienvenida (2 pasos)
 - [x] Pantalla de carga con **pokebola animada en CSS**
 - [x] Lista de Pokémon con **búsqueda (nombre o número)**, **filtro por tipo** y **scroll infinito**
-- [x] Detalle con tipos, peso, altura, habilidades, stats y debilidades
+- [x] Detalle con descripción, tipos, peso, altura, categoría, habilidad, género, stats y debilidades
 - [x] **Favorito** (❤️) con persistencia
 - [x] Botón **Compartir**: copia nombre + atributos separados por coma al portapapeles
 - [x] Vista de **Favoritos** con estado vacío

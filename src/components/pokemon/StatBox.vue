@@ -1,11 +1,16 @@
 <script setup lang="ts">
-/** Caja etiquetada (peso, altura, habilidad...) como en el diseño del detalle. */
-defineProps<{ label: string; value: string }>()
+import AppIcon, { type IconName } from '@/components/ui/AppIcon.vue'
+
+/** Caja etiquetada (peso, altura, categoría, habilidad) como en el diseño. */
+defineProps<{ label: string; value: string; icon?: IconName }>()
 </script>
 
 <template>
   <div class="stat-box">
-    <span class="stat-box__label">{{ label }}</span>
+    <span class="stat-box__label">
+      <AppIcon v-if="icon" :name="icon" :size="16" />
+      {{ label }}
+    </span>
     <div class="stat-box__value">{{ value }}</div>
   </div>
 </template>
@@ -19,6 +24,9 @@ defineProps<{ label: string; value: string }>()
 }
 
 .stat-box__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);

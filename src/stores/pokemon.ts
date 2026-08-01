@@ -1,10 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { NamedApiResource, Pokemon, RequestStatus } from '@/types/pokemon'
+import type { NamedApiResource, Pokemon, RequestStatus, SpeciesInfo } from '@/types/pokemon'
 import {
+  fetchAbilityName,
   fetchPokemonByName,
   fetchPokemonIndex,
   fetchPokemonNamesByType,
+  fetchSpecies,
 } from '@/services/pokemonApi'
 
 /**
@@ -22,6 +24,12 @@ export const usePokemonStore = defineStore('pokemon', () => {
 
   // Caché de nombres por tipo (para el filtro), un fetch por tipo como máximo.
   const typeNamesCache = new Map<string, string[]>()
+
+  // Caché de datos de especie (categoría/descripción/género) por url.
+  const speciesCache = new Map<string, SpeciesInfo>()
+
+  // Caché del nombre localizado de cada habilidad.
+  const abilityNameCache = new Map<string, string>()
 
   /** Carga el índice completo de nombres una sola vez. */
   async function loadIndex(): Promise<void> {
@@ -70,5 +78,33 @@ export const usePokemonStore = defineStore('pokemon', () => {
     return names
   }
 
-  return { index, indexStatus, detailCache, loadIndex, loadDetail, getCached, loadNamesByType }
+  /** Devuelve (cacheados) los datos de especie de un Pokémon. */
+  async function loadSpecies(speciesUrl: string): Promise<SpeciesInfo> {
+    const cached = speciesCache.get(speciesUrl)
+    if (cached) return cached
+    const info = await fetchSpecies(speciesUrl)
+    speciesCache.set(speciesUrl, info)
+    return info
+  }
+
+  /** Devuelve (cacheado) el nombre localizado de una habilidad. */
+  async function loadAbilityName(slug: string): Promise<string> {
+    const cached = abilityNameCache.get(slug)
+    if (cached) return cached
+    const name = await fetchAbilityName(slug)
+    abilityNameCache.set(slug, name)
+    return name
+  }
+
+  return {
+    index,
+    indexStatus,
+    detailCache,
+    loadIndex,
+    loadDetail,
+    getCached,
+    loadNamesByType,
+    loadSpecies,
+    loadAbilityName,
+  }
 })

@@ -42,6 +42,11 @@ export interface TypeResponse {
   pokemon: TypePokemonSlot[]
 }
 
+/** Respuesta de GET /ability/{nombre} (solo se consumen los nombres localizados). */
+export interface AbilityResponse {
+  names: { name: string; language: NamedApiResource }[]
+}
+
 /** Respuesta de GET /pokemon?limit&offset */
 export interface PokemonListResponse {
   count: number
@@ -87,6 +92,24 @@ export interface PokemonDetailResponse {
   abilities: PokemonAbilitySlot[]
   stats: PokemonStatSlot[]
   sprites: PokemonSprites
+  species: NamedApiResource
+}
+
+/** Respuesta cruda de GET /pokemon-species/{name} (solo lo que se consume). */
+export interface SpeciesResponse {
+  genera: { genus: string; language: NamedApiResource }[]
+  flavor_text_entries: { flavor_text: string; language: NamedApiResource }[]
+  gender_rate: number
+}
+
+/**
+ * Datos que solo entrega /pokemon-species: categoría, descripción y género.
+ * Se cargan de forma perezosa al abrir el detalle (no en cada card).
+ */
+export interface SpeciesInfo {
+  category: string
+  description: string
+  gender: { male: number; female: number } | null
 }
 
 /**
@@ -110,6 +133,10 @@ export interface Pokemon {
   artworkUrl: string
   /** Tipos a los que este Pokémon es débil (calculado con tabla estática). */
   weaknesses: PokemonTypeName[]
+  /** URL del recurso /pokemon-species, para cargar categoría/descripción/género. */
+  speciesUrl: string
+  /** Datos de especie (categoría, descripción, género); se cargan al abrir el detalle. */
+  species?: SpeciesInfo
 }
 
 /** Estado de una petición asíncrona (evita banderas booleanas sueltas). */

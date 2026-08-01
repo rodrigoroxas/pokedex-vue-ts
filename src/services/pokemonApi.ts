@@ -1,12 +1,15 @@
 import type {
+  AbilityResponse,
   NamedApiResource,
   Pokemon,
   PokemonDetailResponse,
   PokemonListResponse,
+  SpeciesInfo,
+  SpeciesResponse,
   TypeResponse,
 } from '@/types/pokemon'
 import { httpGet } from './http'
-import { mapPokemonDetail } from './pokemonMapper'
+import { mapPokemonDetail, mapSpecies } from './pokemonMapper'
 
 /**
  * Servicio de acceso a la PokéAPI. Expone únicamente los dos llamados que
@@ -45,4 +48,27 @@ export async function fetchPokemonByName(name: string, signal?: AbortSignal): Pr
 export async function fetchPokemonNamesByType(type: string, signal?: AbortSignal): Promise<string[]> {
   const data = await httpGet<TypeResponse>(`/type/${type}`, signal)
   return data.pokemon.map((slot) => slot.pokemon.name)
+}
+
+/**
+ * Trae los datos de especie (categoría, descripción, género) desde la url que
+ * entrega el detalle. Es información que /pokemon/{name} no incluye; se pide
+ * solo al abrir el detalle (no por cada card) y se cachea en el store.
+ */
+export async function fetchSpecies(speciesUrl: string, signal?: AbortSignal): Promise<SpeciesInfo> {
+  const raw = await httpGet<SpeciesResponse>(speciesUrl, signal)
+  return mapSpecies(raw)
+}
+
+/**
+ * Devuelve el nombre localizado (español) de una habilidad. La API entrega
+ * los nombres de habilidad en inglés en /pokemon/{name}; su traducción está
+ * en /ability/{nombre}. Se pide solo al abrir el detalle y se cachea.
+ */
+export async function fetchAbilityName(slug: string, signal?: AbortSignal): Promise<string> {
+  const data = await httpGet<AbilityResponse>(`/ability/${slug}`, signal)
+  const localized =
+    data.names.find((entry) => entry.language.name === 'es') ??
+    data.names.find((entry) => entry.language.name === 'en')
+  return localized?.name ?? slug
 }

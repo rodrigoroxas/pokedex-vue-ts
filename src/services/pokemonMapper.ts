@@ -1,4 +1,10 @@
-import type { Pokemon, PokemonDetailResponse, PokemonTypeName } from '@/types/pokemon'
+import type {
+  Pokemon,
+  PokemonDetailResponse,
+  PokemonTypeName,
+  SpeciesInfo,
+  SpeciesResponse,
+} from '@/types/pokemon'
 import { computeWeaknesses } from '@/utils/pokemonType'
 
 /** Etiquetas legibles en español para las stats base. */
@@ -40,5 +46,42 @@ export function mapPokemonDetail(raw: PokemonDetailResponse): Pokemon {
     spriteUrl: sprite ?? artwork ?? '',
     artworkUrl: artwork ?? sprite ?? '',
     weaknesses: computeWeaknesses(types),
+    speciesUrl: raw.species.url,
   }
+}
+
+/** Prefiere el texto en español; si no existe, cae a inglés o al primero. */
+function pickLocalized<T extends { language: { name: string } }>(entries: T[]): T | undefined {
+  return (
+    entries.find((entry) => entry.language.name === 'es') ??
+    entries.find((entry) => entry.language.name === 'en') ??
+    entries[0]
+  )
+}
+
+/**
+ * Traduce la respuesta de /pokemon-species al subconjunto que usa el detalle:
+ * categoría (genus), descripción (flavor text) y distribución de género.
+ */
+export function mapSpecies(raw: SpeciesResponse): SpeciesInfo {
+  // El genus en español viene como "Pokémon Semilla"; se limpia a "Semilla".
+  const category = (pickLocalized(raw.genera)?.genus ?? '')
+    .replace(/pok[eé]mon/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  // El flavor text trae saltos de línea y de página; se normalizan a espacios.
+  const description = (pickLocalized(raw.flavor_text_entries)?.flavor_text ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  // gender_rate: -1 = sin género; si no, la fracción hembra es rate/8.
+  const gender =
+    raw.gender_rate < 0
+      ? null
+      : {
+          female: Math.round((raw.gender_rate / 8) * 1000) / 10,
+          male: Math.round((1 - raw.gender_rate / 8) * 1000) / 10,
+        }
+
+  return { category, description, gender }
 }

@@ -21,6 +21,7 @@ const bulbasaur: Pokemon = {
   spriteUrl: 'sprite.png',
   artworkUrl: 'artwork.png',
   weaknesses: ['fire', 'ice'],
+  speciesUrl: '',
 }
 
 describe('formatPokedexNumber', () => {

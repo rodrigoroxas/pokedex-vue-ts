@@ -19,6 +19,13 @@ export type IconName =
   | 'close'
   | 'filter'
   | 'chevron-down'
+  | 'weight'
+  | 'ruler'
+  | 'category'
+  | 'ability'
+  | 'pokeball'
+  | 'male'
+  | 'female'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: number }>(), { size: 24 })
 
@@ -35,6 +42,13 @@ const ICON_PATHS: Record<IconName, string> = {
   close: 'M18 6 6 18M6 6l12 12',
   filter: 'M22 4H2l8 9.46V20l4-2v-4.54z',
   'chevron-down': 'm6 9 6 6 6-6',
+  weight: 'M12 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8.5 7h7l2.2 12.2a1.5 1.5 0 0 1-1.5 1.8H7.8a1.5 1.5 0 0 1-1.5-1.8z',
+  ruler: 'M15.5 3.5 3.5 15.5l5 5 12-12zM7 12l2 2M10 9l2 2M13 6l2 2',
+  category: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+  ability: 'M12 2 3 7v6c0 5 3.8 8 9 9 5.2-1 9-4 9-9V7z',
+  pokeball: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h6M15 12h6M15 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0Z',
+  male: 'M10.5 21a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11ZM14.5 9.5 21 3M15 3h6v6',
+  female: 'M12 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10ZM12 13v8M9 18h6',
 }
 
 const isFilled = computed(() => props.name === 'heart-filled')
