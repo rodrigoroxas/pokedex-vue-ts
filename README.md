@@ -4,6 +4,8 @@ Aplicación de **lista de Pokémon y favoritos** construida con **Vue 3 + TypeSc
 
 > Splash → Onboarding → Pokédex (búsqueda, filtro y scroll infinito) → Detalle (favorito ❤️ + compartir 📋) → Favoritos persistidos (con eliminar).
 
+**🔗 Demo en vivo:** [pokedex-global66-rojas.vercel.app](https://pokedex-global66-rojas.vercel.app/)
+
 ---
 
 ## 🚀 Puesta en marcha
