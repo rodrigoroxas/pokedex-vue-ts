@@ -1,0 +1,58 @@
+import { ref } from 'vue'
+import { defineStore } from 'pinia'
+import type { NamedApiResource, Pokemon, RequestStatus } from '@/types/pokemon'
+import { fetchPokemonByName, fetchPokemonIndex } from '@/services/pokemonApi'
+
+/**
+ * Store de datos de Pokémon: mantiene el índice de nombres y una caché de
+ * detalles ya cargados. Actúa como capa de caché para no re-pedir a la API
+ * un Pokémon que ya se trajo (clave para el rendimiento con mucha data).
+ */
+export const usePokemonStore = defineStore('pokemon', () => {
+  const index = ref<NamedApiResource[]>([])
+  const indexStatus = ref<RequestStatus>('idle')
+
+  const detailCache = ref(new Map<string, Pokemon>())
+  // Peticiones de detalle en vuelo, para deduplicar cargas concurrentes.
+  const pendingDetails = new Map<string, Promise<Pokemon>>()
+
+  /** Carga el índice completo de nombres una sola vez. */
+  async function loadIndex(): Promise<void> {
+    if (indexStatus.value === 'loading' || index.value.length > 0) return
+    indexStatus.value = 'loading'
+    try {
+      index.value = await fetchPokemonIndex()
+      indexStatus.value = 'success'
+    } catch {
+      indexStatus.value = 'error'
+    }
+  }
+
+  /**
+   * Devuelve el detalle de un Pokémon usando la caché. Si hay una petición
+   * idéntica en curso, la reutiliza en lugar de lanzar otra (deduplicación).
+   */
+  function loadDetail(name: string): Promise<Pokemon> {
+    const cached = detailCache.value.get(name)
+    if (cached) return Promise.resolve(cached)
+
+    const inFlight = pendingDetails.get(name)
+    if (inFlight) return inFlight
+
+    const request = fetchPokemonByName(name)
+      .then((pokemon) => {
+        detailCache.value.set(name, pokemon)
+        return pokemon
+      })
+      .finally(() => pendingDetails.delete(name))
+
+    pendingDetails.set(name, request)
+    return request
+  }
+
+  function getCached(name: string): Pokemon | undefined {
+    return detailCache.value.get(name)
+  }
+
+  return { index, indexStatus, detailCache, loadIndex, loadDetail, getCached }
+})
