@@ -2,8 +2,8 @@ import { ref } from 'vue'
 
 /**
  * Copia texto al portapapeles con una bandera reactiva `copied` que se
- * autolimpia. Encapsula el acceso a la API del navegador y un fallback para
- * contextos sin `navigator.clipboard` (SOLID: la UI no conoce estos detalles).
+ * autolimpia. Encapsula el acceso a la API del navegador (SOLID: la UI no
+ * conoce estos detalles) y expone `error` para reflejar fallos en la vista.
  */
 export function useClipboard(resetDelay = 2000) {
   const copied = ref(false)
@@ -12,11 +12,8 @@ export function useClipboard(resetDelay = 2000) {
   async function copy(text: string): Promise<void> {
     error.value = false
     try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(text)
-      } else {
-        fallbackCopy(text)
-      }
+      if (!navigator.clipboard) throw new Error('Clipboard API no disponible')
+      await navigator.clipboard.writeText(text)
       copied.value = true
       window.setTimeout(() => (copied.value = false), resetDelay)
     } catch {
@@ -25,16 +22,4 @@ export function useClipboard(resetDelay = 2000) {
   }
 
   return { copied, error, copy }
-}
-
-/** Copia vía textarea temporal para navegadores/contextos sin Clipboard API. */
-function fallbackCopy(text: string): void {
-  const textarea = document.createElement('textarea')
-  textarea.value = text
-  textarea.style.position = 'fixed'
-  textarea.style.opacity = '0'
-  document.body.appendChild(textarea)
-  textarea.select()
-  document.execCommand('copy')
-  document.body.removeChild(textarea)
 }
