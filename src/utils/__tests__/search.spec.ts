@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { pokemonMatchesQuery } from '@/utils/search'
+import { filterPokemonList, pokemonMatchesQuery } from '@/utils/search'
+import type { PokemonTypeName } from '@/types/pokemon'
 
 describe('pokemonMatchesQuery', () => {
   it('devuelve true con búsqueda vacía', () => {
@@ -24,5 +25,32 @@ describe('pokemonMatchesQuery', () => {
 
   it('no coincide un número que no corresponde', () => {
     expect(pokemonMatchesQuery('pikachu', 25, '99')).toBe(false)
+  })
+})
+
+describe('filterPokemonList', () => {
+  const list = [
+    { name: 'bulbasaur', id: 1, types: ['grass', 'poison'] as PokemonTypeName[] },
+    { name: 'charmander', id: 4, types: ['fire'] as PokemonTypeName[] },
+    { name: 'squirtle', id: 7, types: ['water'] as PokemonTypeName[] },
+  ]
+
+  it('sin filtros devuelve la lista completa', () => {
+    expect(filterPokemonList(list, '', [])).toHaveLength(3)
+  })
+
+  it('filtra por texto (nombre)', () => {
+    const result = filterPokemonList(list, 'char', [])
+    expect(result.map((p) => p.name)).toEqual(['charmander'])
+  })
+
+  it('filtra por tipo (unión)', () => {
+    const result = filterPokemonList(list, '', ['fire', 'water'])
+    expect(result.map((p) => p.name)).toEqual(['charmander', 'squirtle'])
+  })
+
+  it('combina texto y tipo', () => {
+    expect(filterPokemonList(list, '1', ['grass'])).toHaveLength(1)
+    expect(filterPokemonList(list, 'squirtle', ['grass'])).toHaveLength(0)
   })
 })
