@@ -79,8 +79,8 @@ El detalle muestra las **debilidades** de cada Pokémon. Esa información normal
 ### 4. Fidelidad al diseño y campos fuera de alcance
 El diseño del detalle incluye *descripción*, *categoría* y *género*, que **no vienen** en `/pokemon/{name}` (requieren `/pokemon-species`, fuera de los dos endpoints permitidos). Para respetar esa restricción, el detalle se construye con lo que **sí** entrega el endpoint autorizado (tipos, peso, altura, habilidades y **estadísticas base**) más las debilidades calculadas. Es una decisión consciente: priorizar la regla de los dos llamados.
 
-### 5. Búsqueda por nombre y número (no por tipo)
-El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales. El **filtro por tipo** que aparece en el diseño se dejó fuera **a propósito**: el índice no incluye el tipo, así que un filtro por tipo completo exigiría el endpoint `/type` (un tercer llamado). Se priorizó la restricción de dos endpoints por sobre esa funcionalidad.
+### 5. Búsqueda por nombre y número
+El buscador filtra en cliente por **nombre** y por **número de entrada** (id), ambos disponibles en el índice sin peticiones adicionales. La coincidencia es instantánea y admite el número con o sin relleno de ceros (`1`, `01`, `001`).
 
 ### 6. Adaptación mobile → desktop/web
 El diseño original es mobile (360px). Se adaptó con un enfoque **responsive** real: en móvil, columna única con **tab bar inferior**; en desktop, una **barra de navegación superior tipo web**, layout ancho (1120px) con las cards en **grilla de varias columnas**, onboarding en **dos columnas (landscape)** y el detalle como **modal ancho de dos columnas**. Breakpoint en 768px.
