@@ -118,9 +118,9 @@ async function share() {
 
         <div class="sheet__grid">
           <StatBox icon="weight" label="Peso" :value="`${pokemon.weightKg} kg`" />
-          <StatBox icon="ruler" label="Altura" :value="`${pokemon.heightMeters} m`" />
+          <StatBox icon="height" label="Altura" :value="`${pokemon.heightMeters} m`" />
           <StatBox icon="category" label="Categoría" :value="category" />
-          <StatBox icon="pokeball" label="Habilidad" :value="abilityLabel" />
+          <StatBox icon="ability" label="Habilidad" :value="abilityLabel" />
         </div>
 
         <GenderBar v-if="gender" :gender="gender" />

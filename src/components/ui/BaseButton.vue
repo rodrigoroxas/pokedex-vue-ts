@@ -22,7 +22,8 @@ withDefaults(
   justify-content: center;
   gap: var(--space-xs);
   padding: 16px var(--space-lg);
-  border-radius: var(--radius-lg);
+  /* El diseño usa botones tipo pill (rx=24 sobre alto 48). */
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   transition:

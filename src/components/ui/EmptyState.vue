@@ -3,19 +3,30 @@ import { computed } from 'vue'
 
 /**
  * Estado ilustrado reutilizable para "sin favoritos", "error" y "muy pronto".
- * La ilustración (un Pokémon del diseño) se muestra en escala de grises vía
- * CSS. Por defecto es Magikarp (id 129); se puede cambiar con `artworkId`
- * para respetar el diseño (p.ej. Jigglypuff, id 39, en la pantalla "muy pronto").
+ * Usa las ilustraciones del diseño (Figma), ya en escala de grises. Por defecto
+ * es Magikarp; en la pantalla "muy pronto" se usa Jigglypuff (`art="jigglypuff"`).
  */
+type StateArt = 'magikarp' | 'jigglypuff'
+
 const props = withDefaults(
-  defineProps<{ title: string; description?: string; artworkId?: number }>(),
-  { description: '', artworkId: 129 },
+  defineProps<{ title: string; description?: string; art?: StateArt }>(),
+  { description: '', art: 'magikarp' },
 )
 
-const artworkUrl = computed(
-  () =>
-    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${props.artworkId}.png`,
-)
+const STATE_ART = import.meta.glob('../../assets/images/states/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
+const artUrls: Record<StateArt, string> = Object.fromEntries(
+  Object.entries(STATE_ART).map(([path, url]) => [
+    path.split('/').pop()!.replace('.svg', ''),
+    url,
+  ]),
+) as Record<StateArt, string>
+
+const artworkUrl = computed(() => artUrls[props.art])
 </script>
 
 <template>
@@ -43,7 +54,6 @@ const artworkUrl = computed(
   width: 180px;
   height: 180px;
   object-fit: contain;
-  filter: grayscale(1) opacity(0.35);
 }
 
 .empty__title {

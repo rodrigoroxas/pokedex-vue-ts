@@ -153,11 +153,51 @@ function apply() {
   color: var(--color-text-secondary);
 }
 
+/* Checkbox fiel al diseño (panel Options): cuadrado redondeado con borde gris;
+   al marcarse se rellena azul (--color-primary-dark) con un tick blanco. */
 .option__check {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--color-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+  background: var(--color-surface);
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.option__check::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform 0.12s ease;
+}
+
+.option__check:checked {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.option__check:checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.option__check:focus-visible {
+  outline: 2px solid var(--color-primary-strong);
+  outline-offset: 2px;
 }
 
 .sheet__foot {
